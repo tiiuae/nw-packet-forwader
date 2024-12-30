@@ -52,6 +52,8 @@
             clang
             #cargo-audit
             cargo-tarpaulin
+            libpcap
+            tokio-console
           ];
         };
 
@@ -92,6 +94,9 @@
         nwPcktFwdPackage-cargoFmt = craneLib.cargoFmt (individualCrateArgs
           // {
             inherit src cargoArtifacts;
+             buildPhaseCargoCommand = ''
+             cargo fmt --check
+              '';
           });
 
         #  2. Run clippy (and deny all warnings) on the crate source.
@@ -137,9 +142,11 @@
                 lldb
                 clang
                 cargo-audit
+                libpcap
               ];
               buildPhaseCargoCommand = ''
                 if [[ "${buildType}" == "release" ]]; then
+                     cargo test
                      cargo build --release
                   else
                      cargo build
@@ -166,6 +173,9 @@
             inherit
               # Build the crate as part of `nix flake check` for convenience
               nwPcktFwdRelease
+              nwPcktFwdPackage-cargoFmt
+              nwPcktFwdPackage-cargoClippy
+              nwPcktFwdPackage-cargoTarpaulin
               nwPcktFwdPackage-cargoAudit
               ;
           };
